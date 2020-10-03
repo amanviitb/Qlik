@@ -44,14 +44,13 @@ func (s *server) handleGetSingleMessage() http.HandlerFunc {
 		MessageText  string `json:"messageText"`
 		IsPalindrome bool   `json:"isPalindrome"`
 	}
-
 	return func(rw http.ResponseWriter, req *http.Request) {
 		// parse the request to fetch the id from the URI
 		pathVars := mux.Vars(req)
 		messageID := pathVars["id"]
 
 		// assuming each message gets its unique ID
-		err := data.DeleteMessageWithID(messageID)
+		message, err := data.GetMessageByID(messageID)
 
 		switch err {
 		case nil:
@@ -64,17 +63,37 @@ func (s *server) handleGetSingleMessage() http.HandlerFunc {
 			http.Error(rw, "", http.StatusInternalServerError)
 			return
 		}
-		rw.WriteHeader(http.StatusNoContent)
+
+		isPalindrome := checkIfPalindrome(message.Text)
+		res := response{MessageText: message.Text, IsPalindrome: isPalindrome}
+		err = data.ToJSON(res, rw)
+		if err != nil {
+			http.Error(rw, "Internal error", http.StatusInternalServerError)
+		}
 	}
 }
 
 // DELETE /messages/{id}
 func (s *server) handleDeleteMessage() http.HandlerFunc {
-	// check to see if the id exists, if not send http.StatusNotFound
-	// else delete the resource and if error occurs return http.StatusInternalServerError
-	// else return http.Deleted status
 	return func(rw http.ResponseWriter, req *http.Request) {
+		// parse the request to fetch the id from the URI
+		pathVars := mux.Vars(req)
+		messageID := pathVars["id"]
 
+		err := data.DeleteMessageWithID(messageID)
+
+		switch err {
+		case nil:
+		case data.ErrMessageNotFound:
+			s.logger.Error("Unable to fetch message to delete", "error: ", err)
+			http.Error(rw, "No message found with the given ID", http.StatusNotFound)
+			return
+		default:
+			s.logger.Error("Unable to fetch message", "error: ", err)
+			http.Error(rw, "", http.StatusInternalServerError)
+			return
+		}
+		rw.WriteHeader(http.StatusNoContent)
 	}
 }
 

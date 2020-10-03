@@ -17,6 +17,7 @@ func (s *server) RegisterRoutes() {
 	s.router.HandleFunc("/messages", s.handleGetMessages()).Methods(http.MethodGet)
 	s.router.HandleFunc("/messages", s.handlePostMessage()).Methods(http.MethodPost)
 	s.router.HandleFunc("/messages/{id}", s.handleGetSingleMessage()).Methods(http.MethodGet)
+	s.router.HandleFunc("/messages/{id}", s.handleDeleteMessage()).Methods(http.MethodDelete)
 }
 
 // Logging middleware logs the incoming requests

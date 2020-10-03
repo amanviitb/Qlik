@@ -16,10 +16,7 @@ type Message struct {
 // Messages is the collection of all messages
 type Messages []*Message
 
-var messages Messages = Messages{
-	&Message{ID: "123", Text: "Olo", Sender: "Stu"},
-	&Message{ID: "1122", Text: "Hello", Sender: "Sam"},
-}
+var messages Messages
 
 // GetMessages returns all the messages
 func GetMessages() Messages {
@@ -54,7 +51,7 @@ func DeleteMessageWithID(messageID string) error {
 	if indexToDelete == -1 {
 		return ErrMessageNotFound
 	}
-	messages = append(messages[:indexToDelete], messages[indexToDelete+1])
+	messages = append(messages[:indexToDelete], messages[indexToDelete+1:]...)
 	return nil
 }
 
