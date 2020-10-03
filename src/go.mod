@@ -1,4 +1,4 @@
-module github.com/amanviitb/qlik-assignment/src
+module github.com/amanviitb/Qlik/src
 
 go 1.15
 
