@@ -29,8 +29,8 @@ func NewServer() Server {
 func (srv *server) Start() {
 	srv.RegisterRoutes()
 	s := http.Server{
-		Addr:    ":9091",    // configure the bind address
-		Handler: srv.router, // set the default handler
+		Addr:    ":9091",                                    // configure the bind address
+		Handler: Tracing()(Logging(srv.logger)(srv.router)), // set the default handler
 		// ErrorLog:     Error,             // set the logger for the server
 		ReadTimeout:  5 * time.Second,   // max time to read request from the client
 		WriteTimeout: 10 * time.Second,  // max time to write response to the client
