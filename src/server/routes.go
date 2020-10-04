@@ -13,6 +13,7 @@ const (
 	tracingID = "Request-Tracing-ID"
 )
 
+// RequestTracing is type defined to be used for a context with value
 type RequestTracing string
 
 // RegisterRoutes register the endpoints for the service to receive requests on
@@ -46,7 +47,6 @@ func Tracing() func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			requestID := r.Header.Get("X-Request-Id")
 			if requestID == "" {
-				// requestID = fmt.Sprintf("%d", time.Now().UnixNano())
 				requestID = uuid.New().String()
 			}
 			ctx := context.WithValue(r.Context(), RequestTracing(tracingID), requestID)
