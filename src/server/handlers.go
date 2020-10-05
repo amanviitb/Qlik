@@ -2,7 +2,10 @@ package server
 
 import (
 	"net/http"
-	"strings"
+	"os"
+	"runtime"
+	"strconv"
+	"time"
 
 	"github.com/amanviitb/Qlik/src/data"
 	"github.com/gorilla/mux"
@@ -14,6 +17,7 @@ func (s *server) handleGetMessages() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		s.logger.Info(req.Method, "Get All Messages")
 		messages := data.GetMessages()
+		rw.Header().Set("Content-Type", "application/json; charset=utf-8")
 		err := data.ToJSON(messages, rw)
 		if err != nil {
 			s.logger.Error("Unable to serializing message", err)
@@ -47,8 +51,7 @@ func (s *server) handleGetSingleMessage() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		// parse the request to fetch the id from the URI
 		pathVars := mux.Vars(req)
-		messageID := pathVars["id"]
-
+		messageID, _ := strconv.Atoi(pathVars["id"])
 		// assuming each message gets its unique ID
 		message, err := data.GetMessageByID(messageID)
 
@@ -78,7 +81,7 @@ func (s *server) handleDeleteMessage() http.HandlerFunc {
 	return func(rw http.ResponseWriter, req *http.Request) {
 		// parse the request to fetch the id from the URI
 		pathVars := mux.Vars(req)
-		messageID := pathVars["id"]
+		messageID, _ := strconv.Atoi(pathVars["id"])
 
 		err := data.DeleteMessageWithID(messageID)
 
@@ -97,28 +100,28 @@ func (s *server) handleDeleteMessage() http.HandlerFunc {
 	}
 }
 
-// checkIfPalindrome checks to see if the given string is a palindrome
-func checkIfPalindrome(s string) bool {
-	// an empty string or a string with a single character is always a palindrome
-	if len(s) == 0 || len(s) == 1 {
-		return true
-	}
-	// two indices to keep track of each character from left and right
-	var left, right = 0, len(s) - 1
-	for left <= right {
-		if strings.ToLower(string(s[right])) < string('a') ||
-			strings.ToLower(string(s[right])) > string('z') { // jump over the non-alphabet character from right
-			right--
-		} else if strings.ToLower(string(s[left])) < string('a') ||
-			strings.ToLower(string(s[left])) > string('z') { // jump over the non-alphabet character from left
-			left++
-		} else if strings.ToLower(string(s[right])) !=
-			strings.ToLower(string(s[left])) { // characters at both ends don't match
-			return false
-		} else { // characters at both ends match
-			left++
-			right--
+func (s *server) handleGetHealth() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		txID, _ := r.Context().Value(RequestTracing(tracingID)).(string)
+
+		healthStatus := data.Health{}
+		healthStatus.ServiceName = "palindrome-service"
+		healthStatus.ServiceProvider = "Some Server"
+		healthStatus.ServiceVersion = "v1.1.0"
+		healthStatus.TimeStampUTC = time.Now().UTC().String()
+		healthStatus.ServiceStatus = data.ServiceRunning
+		healthStatus.ConnectionStatus = data.ConnectionActive
+
+		name, _ := os.Hostname()
+
+		healthStatus.Hostname = name
+		healthStatus.OS = runtime.GOOS
+
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		err := data.ToJSON(healthStatus, w)
+		if err != nil {
+			s.logger.Error("%s:%s unmarshal health object error %v\n", tracingID, txID, err)
+			w.WriteHeader(http.StatusInternalServerError)
 		}
-	}
-	return true
+	})
 }

@@ -20,8 +20,10 @@ var _ Server = (*server)(nil)
 
 // NewServer returns an instance of server configured with logger and router
 func NewServer() Server {
+	r := mux.NewRouter()
+	s := r.PathPrefix("/api/v1").Subrouter()
 	return &server{
-		router: mux.NewRouter(),
+		router: s,
 		logger: logger.GetLogger(),
 	}
 }

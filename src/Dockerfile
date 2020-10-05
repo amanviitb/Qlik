@@ -2,6 +2,8 @@ FROM golang:1.15-alpine
 
 ENV BINARY_NAME="palindrome-message"
 
+ENV CGO_ENABLED=0 
+
 WORKDIR /go/src/app
 
 COPY ./go.mod ./
