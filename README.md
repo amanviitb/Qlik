@@ -1,6 +1,6 @@
 # A simple REST service to check if a message is palindrome or not
 
-A microserver exposes an API api/v1/message 
+The service exposes a simple REST API to check if a given message(a REST resource) is a palindrome or not. 
 
 
 # Running Locally
@@ -75,4 +75,4 @@ POST `/api/v1/messages` Adds a new message to the list of messages to be request
 DELETE `api/v1/messages{id}` Removes a message with ID or returns `404` if the message doesn't exist
 
 ### Observability
-This is done through **_middlewares_** that are responsible for *logging* every incoming request and attaches some metrics to the request. Also, every request is tagged with a unique ID (unless otherwise sent as part of request header `X-Request-ID` for **_tracing_* the request should anything go wrong with that request.
+This is done through **_middlewares_** that are responsible for *logging* every incoming request and attaches some metrics to the request. Also, every request is tagged with a unique ID (unless otherwise sent as part of request header `X-Request-ID` for **_tracing_** the request should anything go wrong with that request.
