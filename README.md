@@ -2,6 +2,7 @@
 
 The service exposes a simple REST API to check if a given message(a REST resource) is a palindrome or not. 
 
+You could use [this](https://www.grammarly.com/blog/16-surprisingly-funny-palindromes/) for a list of 16 surprisingly funny palindromes and for testing the workig of the API
 
 # Running Locally
 
